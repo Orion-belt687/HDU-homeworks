@@ -1,2 +1,2 @@
-# HDU-homewoorks
+# HDU-homeworks
 c/cpp homeworks
