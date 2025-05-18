@@ -1,16 +1,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 #include <string.h>
 #include <signal.h>
 #include <math.h> 
-//Ã°Åİok£¬¼òµ¥Ñ¡Ôñok£¬¼òµ¥²åÈëok£¬¿ìÅÅok£¬¹é²¢ÅÅĞòok£¬¼ÆÊıÅÅĞòok£¬Í°ÅÅĞòok?£¬»ùÊıÅÅĞòok
-//ÕâÀï¶¼ÊÇ´ÓĞ¡µ½´óÅÅµÄ£¡£¡£¡£¡£¡£¡£¡£¡£¡£¡£¡£¡
-//Ëæ»úÊı×éÉú³Éok£¬ÅÅĞò¼ì²éok¼°¼ÆÊ±º¯Êı
-void bubble(int A[],int len){//Ã°ÅİÅÅĞò
+//å†’æ³¡okï¼Œç®€å•é€‰æ‹©okï¼Œç®€å•æ’å…¥okï¼Œå¿«æ’okï¼Œå½’å¹¶æ’åºokï¼Œè®¡æ•°æ’åºokï¼Œæ¡¶æ’åºok?ï¼ŒåŸºæ•°æ’åºok
+//è¿™é‡Œéƒ½æ˜¯ä»å°åˆ°å¤§æ’çš„ï¼ï¼ï¼ï¼ï¼ï¼ï¼ï¼ï¼ï¼ï¼ï¼
+//éšæœºæ•°ç»„ç”Ÿæˆokï¼Œæ’åºæ£€æŸ¥okåŠè®¡æ—¶å‡½æ•°
+#define TIME_LIMIT 300 // 5åˆ†é’Ÿï¼Œå•ä½ä¸ºç§’
+
+int bubble(int A[],int len){//å†’æ³¡æ’åº
+    clock_t start = clock();
     int i,j;
     for(i=0;i<len;i++){
         for(j=0;j<len-i-1;j++){
+            if ((clock() - start) / CLOCKS_PER_SEC > TIME_LIMIT) {
+                printf("bubble: è¶…æ—¶ç»ˆæ­¢\n");
+                return 1;
+            }
             if(A[j]>A[j+1]){
                 int temp=A[j];
                 A[j]=A[j+1];
@@ -18,10 +26,15 @@ void bubble(int A[],int len){//Ã°ÅİÅÅĞò
             }
         }
     }
-
+    return 0;
 }
-void simple(int A[],int len){//¼òµ¥ÅÅĞò
+int simple(int A[],int len){//ç®€å•æ’åº
+    clock_t start = clock();
     for(int i=0;i<len;i++){
+        if ((clock() - start) / CLOCKS_PER_SEC > TIME_LIMIT) {
+                printf("simple: è¶…æ—¶ç»ˆæ­¢\n");
+                return 1;
+            }
         int mininow=i;
         for(int j=i+1;j<len;j++){
             if(A[j]<A[mininow]){
@@ -34,9 +47,15 @@ void simple(int A[],int len){//¼òµ¥ÅÅĞò
             A[mininow]=temp;
         }
     }
+    return 0;
 }
-void insert(int A[],int len){//²åÈë
+int insert(int A[],int len){//æ’å…¥
+    clock_t start = clock();
     for(int i=1;i<len;i++){
+        if ((clock() - start) / CLOCKS_PER_SEC > TIME_LIMIT) {
+            printf("insert: è¶…æ—¶ç»ˆæ­¢\n");
+            return 1;
+        }
         int temp=A[i];
         int j=i-1;
         while(j>=0&&A[j]>temp){
@@ -45,23 +64,30 @@ void insert(int A[],int len){//²åÈë
         }
         A[j+1]=temp;
     }
+    return 0;
 }
-void quick(int A[],int low,int high){//¿ìËÙÅÅĞò
-    if(low<high){
-        int i=low,j=high;
-        int key=A[low];
-        while(i<j){
-            while(i<j&&A[j]>=key) j--;
-            if(i<j) A[i++]=A[j];
-            while(i<j&&A[i]<=key) i++;
-            if(i<j) A[j--]=A[i];
+void quick(int A[],int low,int high){//å¿«é€Ÿæ’åº
+    if (low < high) {
+        // éšæœºé€‰å–æ¢è½´å¹¶äº¤æ¢åˆ° A[low]
+        int pivotIndex = low + rand() % (high - low + 1);
+        int temp = A[low];
+        A[low] = A[pivotIndex];
+        A[pivotIndex] = temp;
+
+        int i = low, j = high;
+        int key = A[low];
+        while (i < j) {
+            while (i < j && A[j] >= key) j--;
+            if (i < j) A[i++] = A[j];
+            while (i < j && A[i] <= key) i++;
+            if (i < j) A[j--] = A[i];
         }
-        A[i]=key;
-        quick(A,low,i-1);
-        quick(A,i+1,high);
+        A[i] = key;
+        quick(A, low, i - 1);
+        quick(A, i + 1, high);
     }
 }
-void merge(int A[],int low,int high){//¹é²¢
+void merge(int A[],int low,int high){//å½’å¹¶
     int mid=(low+high)/2;
      if (low < high) {
         merge(A, low, mid);
@@ -80,19 +106,19 @@ void merge(int A[],int low,int high){//¹é²¢
         free(temp);
     }
 }
-void count(int A[],int len){//¼ÆÊıÅÅĞò
-    // 1. ÕÒµ½×î´óÖµ
+void count(int A[],int len){//è®¡æ•°æ’åº
+    // 1. æ‰¾åˆ°æœ€å¤§å€¼
     int max = A[0];
     for (int i = 1; i < len; i++) {
         if (A[i] > max) max = A[i];
     }
-    // 2. ·ÖÅä¼ÆÊıÊı×é
+    // 2. åˆ†é…è®¡æ•°æ•°ç»„
     int* temp = (int*)calloc(max + 1, sizeof(int));
-    // 3. ¼ÆÊı
+    // 3. è®¡æ•°
     for (int i = 0; i < len; i++) {
         temp[A[i]]++;
     }
-    // 4. »ØĞ´
+    // 4. å›å†™
     int pos = 0;
     for (int i = 0; i <= max; i++) {
         while (temp[i] > 0) {
@@ -102,7 +128,7 @@ void count(int A[],int len){//¼ÆÊıÅÅĞò
     }
     free(temp);
 }
-void bucket(int A[],int len){//Í°ÅÅĞò£¬Í°µÄ´óĞ¡Îª1
+void bucket(int A[],int len){//æ¡¶æ’åºï¼Œæ¡¶çš„å¤§å°ä¸º1
     int max = A[0];
     for (int i = 1; i < len; i++) {
         if (A[i] > max) max = A[i];
@@ -120,30 +146,30 @@ void bucket(int A[],int len){//Í°ÅÅĞò£¬Í°µÄ´óĞ¡Îª1
     }
     free(temp);
 }
-void radix(int A[],int len){//»ùÊıÅÅĞò
+void radix(int A[],int len){//åŸºæ•°æ’åº
     int max = A[0];
     for (int i = 1; i < len; i++) {
         if (A[i] > max) max = A[i];
     }
-    // ¼ÆËã×î´óÊıµÄÎ»Êı
+    // è®¡ç®—æœ€å¤§æ•°çš„ä½æ•°
     int exp = 1;
     int* output = (int*)malloc(len * sizeof(int));
     while (max / exp > 0) {
         int bucket[10] = {0};
-        // Í³¼ÆÃ¿¸öÍ°ÖĞµÄÔªËØ¸öÊı
+        // ç»Ÿè®¡æ¯ä¸ªæ¡¶ä¸­çš„å…ƒç´ ä¸ªæ•°
         for (int i = 0; i < len; i++) {
             bucket[(A[i] / exp) % 10]++;
         }
-        // ¼ÆËãÇ°×ººÍ£¬È·¶¨Ã¿¸öÔªËØÔÚoutputÖĞµÄÎ»ÖÃ
+        // è®¡ç®—å‰ç¼€å’Œï¼Œç¡®å®šæ¯ä¸ªå…ƒç´ åœ¨outputä¸­çš„ä½ç½®
         for (int i = 1; i < 10; i++) {
             bucket[i] += bucket[i - 1];
         }
-        // ´ÓºóÍùÇ°±éÀú£¬±£Ö¤ÎÈ¶¨ĞÔ
+        // ä»åå¾€å‰éå†ï¼Œä¿è¯ç¨³å®šæ€§
         for (int i = len - 1; i >= 0; i--) {
             int idx = (A[i] / exp) % 10;
             output[--bucket[idx]] = A[i];
         }
-        // ¿½±´»ØÔ­Êı×é
+        // æ‹·è´å›åŸæ•°ç»„
         for (int i = 0; i < len; i++) {
             A[i] = output[i];
         }
@@ -151,7 +177,7 @@ void radix(int A[],int len){//»ùÊıÅÅĞò
     }
     free(output);
 }
-int check(int A[],int len){//¼ì²éÅÅĞòÊÇ·ñÕıÈ·
+int check(int A[],int len){//æ£€æŸ¥æ’åºæ˜¯å¦æ­£ç¡®
     for(int i=0;i<len-1;i++){
         if(A[i]>A[i+1]){
             printf("error!\n");
@@ -161,17 +187,17 @@ int check(int A[],int len){//¼ì²éÅÅĞòÊÇ·ñÕıÈ·
     //printf("ok\n");
     return 0;
 }
-void createrandom(int A[],int len){//ÍêÈ«Ëæ»úÊı×é
+void createrandom(int A[],int len){//å®Œå…¨éšæœºæ•°ç»„
     for(int i=0;i<len;i++){
         A[i]=rand()%len;
     }
 }
-void createswap(int A[],int len){//ÓĞĞòÊı×é»»Î»ÖÃ
-    for(int i=0;i<len;i++){//ÏÈ³öÓĞĞòÊı×é
+void createswap(int A[],int len){//æœ‰åºæ•°ç»„æ¢ä½ç½®
+    for(int i=0;i<len;i++){//å…ˆå‡ºæœ‰åºæ•°ç»„
         A[i]=i;
     }
     int swap=len/5;
-    for(int i=0;i<swap;i++){//µ÷»»Îå·ÖÖ®¶şµÄÊıµÄÎ»ÖÃ
+    for(int i=0;i<swap;i++){//è°ƒæ¢äº”åˆ†ä¹‹äºŒçš„æ•°çš„ä½ç½®
         int first=rand()%len;
         int second=rand()%len;
         int t=0;
@@ -184,31 +210,37 @@ void Try(int A[],int len){
     int* B = (int*)malloc(len * sizeof(int));
     clock_t start, end;
 
-    // Ã°ÅİÅÅĞò
+    // å†’æ³¡æ’åº
     memcpy(B, A, len * sizeof(int));
     start = clock();
-    bubble(B, len);
+    int i=bubble(B, len);
     end = clock();
-    printf("bubble: %ld ms in Windows/ns in LUNIX\n", end - start);
-    check(B, len);
+    if(i==0){
+        printf("bubble: %ld ms in Windows/ns in LUNIX\n", end - start);
+        check(B, len);
+    }
 
-    // ¼òµ¥Ñ¡ÔñÅÅĞò
+    // ç®€å•é€‰æ‹©æ’åº
     memcpy(B, A, len * sizeof(int));
     start = clock();
-    simple(B, len);
+    int j=simple(B, len);
     end = clock();
+    if(j==0){
     printf("simple: %ld ms in Windows/ns in LUNIX\n", end - start);
     check(B, len);
+    }
 
-    // ²åÈëÅÅĞò
+    // æ’å…¥æ’åº
     memcpy(B, A, len * sizeof(int));
     start = clock();
-    insert(B, len);
+    int k=insert(B, len);
     end = clock();
+    if(k==0){
     printf("insert: %ld ms in Windows/ns in LUNIX\n", end - start);
     check(B, len);
+    }
 
-    // ¿ìËÙÅÅĞò
+    // å¿«é€Ÿæ’åº
     memcpy(B, A, len * sizeof(int));
     start = clock();
     quick(B, 0, len - 1);
@@ -216,7 +248,7 @@ void Try(int A[],int len){
     printf("quick: %ld ms in Windows/ns in LUNIX\n", end - start);
     check(B, len);
 
-    // ¹é²¢ÅÅĞò
+    // å½’å¹¶æ’åº
     memcpy(B, A, len * sizeof(int));
     start = clock();
     merge(B, 0, len - 1);
@@ -224,7 +256,7 @@ void Try(int A[],int len){
     printf("merge: %ld ms in Windows/ns in LUNIX\n", end - start);
     check(B, len);
 
-    // ¼ÆÊıÅÅĞò
+    // è®¡æ•°æ’åº
     memcpy(B, A, len * sizeof(int));
     start = clock();
     count(B, len);
@@ -232,7 +264,7 @@ void Try(int A[],int len){
     printf("count: %ld ms in Windows/ns in LUNIX\n", end - start);
     check(B, len);
 
-    // Í°ÅÅĞò
+    // æ¡¶æ’åº
     memcpy(B, A, len * sizeof(int));
     start = clock();
     bucket(B, len);
@@ -240,7 +272,7 @@ void Try(int A[],int len){
     printf("bucket: %ld ms in Windows/ns in LUNIX\n", end - start);
     check(B, len);
 
-    // »ùÊıÅÅĞò
+    // åŸºæ•°æ’åº
     memcpy(B, A, len * sizeof(int));
     start = clock();
     radix(B, len);
@@ -253,43 +285,44 @@ void Try(int A[],int len){
 }
 int main(){
     int A[100];
-    printf("100´òÂÒÊı×é:\n");
+    printf("100æ‰“ä¹±æ•°ç»„:\n");
     createswap(A,100);
     Try(A,100);
-    printf("100Ëæ»úÊı×é:\n");
+    printf("100éšæœºæ•°ç»„:\n");
     createrandom(A,100);
     Try(A,100);
 
     int B[1000];
-    printf("1000´òÂÒÊı×é:\n");
+    printf("1000æ‰“ä¹±æ•°ç»„:\n");
     createswap(B,1000);
     Try(B,1000);
-    printf("1000Ëæ»úÊı×é:\n");
+    printf("1000éšæœºæ•°ç»„:\n");
     createrandom(B,1000);
     Try(B,1000);
 
     int C[10000];
-    printf("10000´òÂÒÊı×é:\n");
+    printf("10000æ‰“ä¹±æ•°ç»„:\n");
     createswap(C,10000);
     Try(C,10000);
-    printf("10000Ëæ»úÊı×é:\n");
+    printf("10000éšæœºæ•°ç»„:\n");
     createrandom(C,10000);
     Try(C,10000);
 
     int D[100000];
-    printf("100000´òÂÒÊı×é:\n");
+    printf("100000æ‰“ä¹±æ•°ç»„:\n");
     createswap(D,100000);
     Try(D,100000);
-    printf("100000Ëæ»úÊı×é:\n");
+    printf("100000éšæœºæ•°ç»„:\n");
     createrandom(D,100000);
     Try(D,100000);
 
-    int E[1000000];
-    printf("1000000´òÂÒÊı×é:\n");
+    int *E=(int *)malloc(1000000*sizeof(int));
+    printf("1000000æ‰“ä¹±æ•°ç»„:\n");
     createswap(E,1000000);
     Try(E,1000000);
-    printf("1000000Ëæ»úÊı×é:\n");
+    printf("1000000éšæœºæ•°ç»„:\n");
     createrandom(E,1000000);
     Try(E,1000000);
+    free(E);
     return 0;
 }
